@@ -252,7 +252,7 @@ export default function RoleSelection() {
           marginBottom: '24px',
         }}>
           <img
-            src="/ksas-logo.png"
+            src="https://res.cloudinary.com/dilrcexxe/image/upload/v1784619847/ksas/logo-main.png"
             alt="Kabarak University Crest"
             style={{ width: '140px', height: '140px', objectFit: 'contain', imageRendering: '-webkit-optimize-contrast' }}
             draggable={false}

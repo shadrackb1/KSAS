@@ -11,19 +11,19 @@
   "lang": "en",
   "icons": [
     {
-      "src": "/ksas-logo.png",
+      "src": "https://res.cloudinary.com/dilrcexxe/image/upload/v1784619847/ksas/logo-main.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/ksas-logo.png",
+      "src": "https://res.cloudinary.com/dilrcexxe/image/upload/v1784619847/ksas/logo-main.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/ksas-logo.png",
+      "src": "https://res.cloudinary.com/dilrcexxe/image/upload/v1784619847/ksas/logo-main.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

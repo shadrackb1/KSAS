@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Code, Play, Loader2, BookOpen, ChevronDown, ChevronUp, Save, Clock, MapPin, Shield } from 'lucide-react';
+import { Code, Play, Loader2, BookOpen, ChevronDown, ChevronUp, Save, Clock, MapPin, Shield, Calendar, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useFirestoreRealtimeCollection } from '../../hooks/useFirestoreRealtime';
@@ -7,6 +7,7 @@ import { db, doc, setDoc } from '../../lib/firebase';
 import { collections } from '../../lib/db';
 import { uploadJSONToCloudinary } from '../../lib/cloudinary';
 import { CAMPUSES } from '../../lib/campuses';
+import { WeeklyScheduleEntry, generateEmptySchedule, getCurrentWeek } from '../../lib/weeklySchedule';
 import toast from 'react-hot-toast';
 
 export interface CourseDefaults {
@@ -15,6 +16,9 @@ export interface CourseDefaults {
   defaultStartTime: string;
   defaultEndTime: string;
   defaultCampusId: string;
+  semesterStart: string;
+  weeklySchedule: WeeklyScheduleEntry[];
+  outlineDocumentUrl: string;
   antiFraudDefaults: {
     requireGps: boolean;
     requireIpRange: boolean;
@@ -90,6 +94,9 @@ export default function CourseManagement() {
             defaultStartTime: c.defaultStartTime || '08:00',
             defaultEndTime: c.defaultEndTime || '10:00',
             defaultCampusId: c.defaultCampusId || '',
+            semesterStart: c.semesterStart || '',
+            weeklySchedule: c.weeklySchedule || generateEmptySchedule(16),
+            outlineDocumentUrl: c.outlineDocumentUrl || '',
             antiFraudDefaults: c.antiFraudDefaults || {
               requireGps: true,
               requireIpRange: true,
@@ -109,6 +116,9 @@ export default function CourseManagement() {
         defaultStartTime: '08:00',
         defaultEndTime: '10:00',
         defaultCampusId: '',
+        semesterStart: '',
+        weeklySchedule: [],
+        outlineDocumentUrl: '',
         antiFraudDefaults: { requireGps: true, requireIpRange: true, allowedRadiusMeters: 500 },
       };
       return { ...prev, [code]: { ...current, ...patch } };
@@ -141,6 +151,9 @@ export default function CourseManagement() {
         defaultStartTime: draft.defaultStartTime,
         defaultEndTime: draft.defaultEndTime,
         defaultCampusId: draft.defaultCampusId,
+        semesterStart: draft.semesterStart,
+        weeklySchedule: draft.weeklySchedule,
+        outlineDocumentUrl: draft.outlineDocumentUrl,
         antiFraudDefaults: draft.antiFraudDefaults,
       };
       await setDoc(docRef, payload, { merge: true });
@@ -383,21 +396,119 @@ export default function CourseManagement() {
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Outline */}
+                        {/* Semester Start Date */}
                         <div className="md:col-span-2">
-                          <label className="form-label" style={{ marginBottom: '6px', display: 'block' }}>
-                            Course Outline <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: '0' }}>(one topic per line — shown as suggestions)</span>
+                          <label className="form-label" style={{ marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Calendar className="w-3.5 h-3.5" style={{ color: 'var(--text-tertiary)' }} />
+                            Semester Start Date
                           </label>
-                          <textarea
-                            value={draft.outline.join('\n')}
-                            onChange={(e) => updateDraft(course.code, { outline: e.target.value.split('\n').filter(Boolean) })}
-                            placeholder={`Week 1: Introduction\nWeek 2: Arrays\nWeek 3: Linked Lists\nWeek 4: Stacks & Queues`}
-                            rows={6}
+                          <input
+                            type="date"
+                            value={draft.semesterStart}
+                            onChange={(e) => {
+                              const newStart = e.target.value;
+                              updateDraft(course.code, { semesterStart: newStart });
+                              // Auto-generate weekly schedule if empty
+                              if (draft.weeklySchedule.every(w => !w.topic)) {
+                                updateDraft(course.code, { weeklySchedule: generateEmptySchedule(16) });
+                              }
+                            }}
                             className="input-base"
-                            style={{ fontFamily: 'var(--font-body)', fontSize: '13px', resize: 'vertical', lineHeight: '1.6' }}
+                            style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', maxWidth: '300px' }}
                           />
                           <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '4px' }}>
-                            {draft.outline.length} topics listed
+                            Used to auto-detect the current week and pre-fill topics when starting sessions.
+                          </p>
+                        </div>
+
+                        {/* Weekly Schedule Grid */}
+                        <div className="md:col-span-2">
+                          <label className="form-label" style={{ marginBottom: '6px', display: 'block' }}>
+                            Weekly Schedule <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: '0' }}>(plan topics for each week of the semester)</span>
+                          </label>
+                          <div style={{
+                            border: '0.5px solid var(--bg-border)',
+                            borderRadius: 'var(--radius-md)',
+                            overflow: 'hidden',
+                            background: 'var(--bg-surface)',
+                          }}>
+                            <div style={{
+                              display: 'grid',
+                              gridTemplateColumns: '60px 1fr 1fr',
+                              gap: '0',
+                              borderBottom: '0.5px solid var(--bg-border)',
+                              background: 'var(--bg-elevated)',
+                            }}>
+                              <div style={{ padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>Week</div>
+                              <div style={{ padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>Title</div>
+                              <div style={{ padding: '8px 12px', fontFamily: 'var(--font-body)', fontSize: '10px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>Topic</div>
+                            </div>
+                            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                              {draft.weeklySchedule.map((entry, idx) => {
+                                const currentWeek = draft.semesterStart ? getCurrentWeek(draft.semesterStart) : null;
+                                const isCurrentWeek = currentWeek === entry.week;
+                                return (
+                                  <div
+                                    key={entry.week}
+                                    style={{
+                                      display: 'grid',
+                                      gridTemplateColumns: '60px 1fr 1fr',
+                                      gap: '0',
+                                      borderBottom: idx < draft.weeklySchedule.length - 1 ? '0.5px solid var(--bg-border)' : 'none',
+                                      background: isCurrentWeek ? 'var(--kabu-maroon-tint)' : 'transparent',
+                                      transition: 'background 150ms',
+                                    }}
+                                  >
+                                    <div style={{
+                                      padding: '8px 12px',
+                                      fontFamily: 'var(--font-mono)',
+                                      fontSize: '12px',
+                                      fontWeight: isCurrentWeek ? 600 : 400,
+                                      color: isCurrentWeek ? 'var(--kabu-maroon)' : 'var(--text-tertiary)',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                    }}>
+                                      {isCurrentWeek && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--kabu-maroon)', marginRight: '6px' }} />}
+                                      W{entry.week}
+                                    </div>
+                                    <div style={{ padding: '4px 8px' }}>
+                                      <input
+                                        value={entry.title}
+                                        onChange={(e) => {
+                                          const newSchedule = [...draft.weeklySchedule];
+                                          newSchedule[idx] = { ...newSchedule[idx], title: e.target.value };
+                                          updateDraft(course.code, { weeklySchedule: newSchedule });
+                                        }}
+                                        placeholder={`Week ${entry.week}`}
+                                        className="input-base"
+                                        style={{ fontSize: '12px', padding: '6px 8px', border: 'none', background: 'transparent' }}
+                                      />
+                                    </div>
+                                    <div style={{ padding: '4px 8px' }}>
+                                      <input
+                                        value={entry.topic}
+                                        onChange={(e) => {
+                                          const newSchedule = [...draft.weeklySchedule];
+                                          newSchedule[idx] = { ...newSchedule[idx], topic: e.target.value };
+                                          updateDraft(course.code, { weeklySchedule: newSchedule });
+                                        }}
+                                        placeholder="e.g. Introduction to Arrays"
+                                        className="input-base"
+                                        style={{ fontSize: '12px', padding: '6px 8px', border: 'none', background: 'transparent' }}
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                          <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '4px' }}>
+                            {draft.weeklySchedule.filter(w => w.topic).length} of {draft.weeklySchedule.length} weeks planned
+                            {draft.semesterStart && getCurrentWeek(draft.semesterStart) && (
+                              <span style={{ color: 'var(--kabu-maroon)', marginLeft: '8px' }}>
+                                · Currently week {getCurrentWeek(draft.semesterStart)}
+                              </span>
+                            )}
                           </p>
                         </div>
 

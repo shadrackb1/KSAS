@@ -24,7 +24,7 @@ export function AppLayout({ role }: AppLayoutProps) {
     <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
       <div className="flex flex-col items-center gap-4">
         <img
-          src="/ksas-logo.png"
+          src="https://res.cloudinary.com/dilrcexxe/image/upload/v1784619847/ksas/logo-main.png"
           alt="Kabarak University"
           className="w-16 h-16 animate-pulse"
           style={{ objectFit: 'contain', imageRendering: '-webkit-optimize-contrast' }}

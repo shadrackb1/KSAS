@@ -19,6 +19,7 @@ import { collections, archiveSession } from '../../lib/db';
 import { generateSessionTOTPSecret } from '../../lib/totp';
 import { exportSessionCSV, buildAttendanceCsv, formatTimestampExact } from '../../lib/csvExport';
 import { CAMPUSES, type CampusConfig } from '../../lib/campuses';
+import { getCurrentWeek, getTopicForWeek } from '../../lib/weeklySchedule';
 
 export default function LecturerDashboard() {
   const navigate = useNavigate();
@@ -115,6 +116,16 @@ export default function LecturerDashboard() {
         setField('campusLat', String(campus.latitude));
         setField('campusLng', String(campus.longitude));
         setField('allowedRadiusMeters', String(campus.defaultRadiusMeters));
+      }
+    }
+    // Auto-fill topic from weekly schedule if available
+    if (course.semesterStart && course.weeklySchedule?.length > 0) {
+      const currentWeek = getCurrentWeek(course.semesterStart);
+      if (currentWeek) {
+        const weekTopic = getTopicForWeek(course.weeklySchedule, currentWeek);
+        if (weekTopic) {
+          setField('topic', weekTopic);
+        }
       }
     }
   };
@@ -303,7 +314,15 @@ const confirmEndSession = async () => {
 
   const enrolledCount = activeSession?.enrolledCount || 0;
   const attendancePct = enrolledCount > 0 ? Math.min(100, Math.round((attendanceCount / enrolledCount) * 100)) : 0;
-  const outlineTopics = selectedCourse?.outline || [];
+  const outlineTopics = useMemo(() => {
+    // Use weeklySchedule if available, fallback to outline
+    if (selectedCourse?.weeklySchedule?.length > 0) {
+      return selectedCourse.weeklySchedule
+        .filter((w: any) => w.topic)
+        .map((w: any) => w.topic);
+    }
+    return selectedCourse?.outline || [];
+  }, [selectedCourse]);
 
   return (
     <div className="animate-page-in" style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 48px' }}>
@@ -498,42 +517,52 @@ const confirmEndSession = async () => {
                         >
                           <BookOpen className="w-3.5 h-3.5 inline" style={{ marginRight: '6px' }} />
                           Course Outline — {outlineTopics.length} topics
-                        </div>
-                        {outlineTopics.map((topic: string, idx: number) => (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => {
-                              if (topicInputRef.current) {
-                                topicInputRef.current.value = topic;
-                                topicInputRef.current.dispatchEvent(new Event('input', { bubbles: true }));
-                                const next = topicInputRef.current.nextElementSibling;
-                                if (next) next.textContent = `${topic.length} / 120`;
-                              }
-                              setShowTopicDropdown(false);
-                            }}
-                            style={{
-                              width: '100%',
-                              textAlign: 'left',
-                              padding: '10px 14px',
-                              background: 'none',
-                              border: 'none',
-                              borderBottom: '0.5px solid var(--bg-border)',
-                              cursor: 'pointer',
-                              fontFamily: 'var(--font-body)',
-                              fontSize: '13px',
-                              color: 'var(--text-primary)',
-                              transition: 'background 150ms',
-                            }}
-                            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--bg-elevated)'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; }}
-                          >
-                            <span style={{ color: 'var(--kabu-maroon)', fontWeight: 600, marginRight: '8px', fontFamily: 'var(--font-mono)', fontSize: '11px' }}>
-                              W{idx + 1}
+                          {selectedCourse?.semesterStart && getCurrentWeek(selectedCourse.semesterStart) && (
+                            <span style={{ color: 'var(--kabu-maroon)', marginLeft: '8px' }}>
+                              · Week {getCurrentWeek(selectedCourse.semesterStart)}
                             </span>
-                            {topic}
-                          </button>
-                        ))}
+                          )}
+                        </div>
+                        {outlineTopics.map((topic: string, idx: number) => {
+                          const currentWeek = selectedCourse?.semesterStart ? getCurrentWeek(selectedCourse.semesterStart) : null;
+                          const isCurrentWeek = currentWeek === idx + 1;
+                          return (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => {
+                                if (topicInputRef.current) {
+                                  topicInputRef.current.value = topic;
+                                  topicInputRef.current.dispatchEvent(new Event('input', { bubbles: true }));
+                                  const next = topicInputRef.current.nextElementSibling;
+                                  if (next) next.textContent = `${topic.length} / 120`;
+                                }
+                                setShowTopicDropdown(false);
+                              }}
+                              style={{
+                                width: '100%',
+                                textAlign: 'left',
+                                padding: '10px 14px',
+                                background: isCurrentWeek ? 'var(--kabu-maroon-tint)' : 'none',
+                                border: 'none',
+                                borderBottom: '0.5px solid var(--bg-border)',
+                                cursor: 'pointer',
+                                fontFamily: 'var(--font-body)',
+                                fontSize: '13px',
+                                color: 'var(--text-primary)',
+                                transition: 'background 150ms',
+                              }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = isCurrentWeek ? 'var(--kabu-maroon-tint)' : 'var(--bg-elevated)'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = isCurrentWeek ? 'var(--kabu-maroon-tint)' : 'none'; }}
+                            >
+                              <span style={{ color: isCurrentWeek ? 'var(--kabu-maroon)' : 'var(--text-tertiary)', fontWeight: isCurrentWeek ? 600 : 400, marginRight: '8px', fontFamily: 'var(--font-mono)', fontSize: '11px' }}>
+                                {isCurrentWeek && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--kabu-maroon)', display: 'inline-block', marginRight: '4px' }} />}
+                                W{idx + 1}
+                              </span>
+                              {topic}
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
