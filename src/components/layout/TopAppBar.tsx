@@ -132,8 +132,9 @@ export function TopAppBar({ role, user }: TopAppBarProps) {
         <img
           src={env.app.logoUrl}
           alt="Kabarak University"
-          className="w-8 h-8"
-          style={{ objectFit: 'contain', borderRadius: '6px' }}
+          className="w-9 h-9"
+          style={{ objectFit: 'contain', imageRendering: '-webkit-optimize-contrast' }}
+          draggable={false}
         />
         <span className="text-base font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>KSAS</span>
       </div>
@@ -165,8 +166,9 @@ export function TopAppBar({ role, user }: TopAppBarProps) {
             <img
               src={env.app.logoUrl}
               alt="Kabarak University"
-              className="w-8 h-8"
-              style={{ objectFit: 'contain', borderRadius: '6px' }}
+              className="w-9 h-9"
+              style={{ objectFit: 'contain', imageRendering: '-webkit-optimize-contrast' }}
+              draggable={false}
             />
             {tierConfig && (
               <span style={tierConfig.style}>{tierConfig.label}</span>

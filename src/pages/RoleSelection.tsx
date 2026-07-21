@@ -254,7 +254,8 @@ export default function RoleSelection() {
           <img
             src="/ksas-logo.png"
             alt="Kabarak University Crest"
-            style={{ width: '120px', height: '120px', objectFit: 'contain' }}
+            style={{ width: '140px', height: '140px', objectFit: 'contain', imageRendering: '-webkit-optimize-contrast' }}
+            draggable={false}
           />
         </div>
 

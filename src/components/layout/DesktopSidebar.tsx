@@ -93,8 +93,9 @@ export function DesktopSidebar({ role, user }: DesktopSidebarProps) {
         <img
           src={env.app.logoUrl}
           alt="Kabarak University"
-          className="w-9 h-9"
-          style={{ objectFit: 'contain', borderRadius: '8px' }}
+          className="w-10 h-10"
+          style={{ objectFit: 'contain', imageRendering: '-webkit-optimize-contrast' }}
+          draggable={false}
         />
         <div>
           <span className="text-lg font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>KSAS</span>

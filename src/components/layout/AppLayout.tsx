@@ -26,8 +26,9 @@ export function AppLayout({ role }: AppLayoutProps) {
         <img
           src="/ksas-logo.png"
           alt="Kabarak University"
-          className="w-14 h-14 animate-pulse"
-          style={{ objectFit: 'contain', borderRadius: '8px' }}
+          className="w-16 h-16 animate-pulse"
+          style={{ objectFit: 'contain', imageRendering: '-webkit-optimize-contrast' }}
+          draggable={false}
         />
         <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Loading KSAS…</p>
       </div>
