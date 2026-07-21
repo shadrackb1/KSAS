@@ -245,19 +245,21 @@ export default function RoleSelection() {
           pointerEvents: 'none',
         }} />
 
-        {/* Logo container */}
-        <div style={{
-          position: 'relative',
-          zIndex: 1,
-          marginBottom: '24px',
-        }}>
-          <img
-            src="https://res.cloudinary.com/dilrcexxe/image/upload/v1784619847/ksas/logo-main.png"
-            alt="Kabarak University Crest"
-            style={{ width: '140px', height: '140px', objectFit: 'contain', imageRendering: '-webkit-optimize-contrast' }}
-            draggable={false}
-          />
-        </div>
+{/* Logo container */}
+<div style={{
+  position: 'relative',
+  zIndex: 1,
+  marginBottom: '24px',
+}}>
+<img
+  src="/kabarak-logo.png"
+  alt="Kabarak University"
+  width={100}
+  height={110}
+  style={{ objectFit: 'contain', imageRendering: '-webkit-optimize-contrast' }}
+  draggable={false}
+/>
+</div>
 
         {/* Academic Portal heading */}
         <h1 style={{

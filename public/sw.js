@@ -7,8 +7,8 @@ const BUILD_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/ksas-logo.png',
-  'https://res.cloudinary.com/dilrcexxe/image/upload/v1784619847/ksas/logo-main.png',
+  '/kabarak-logo.png',
+  '/kabarak-logo.png',
 ];
 
 // Runtime caching strategy
@@ -144,8 +144,8 @@ self.addEventListener('push', (event) => {
   const data = event.data.json();
   const options = {
     body: data.body || 'New notification',
-    icon: 'https://res.cloudinary.com/dilrcexxe/image/upload/v1784619847/ksas/logo-main.png',
-    badge: 'https://res.cloudinary.com/dilrcexxe/image/upload/v1784619847/ksas/logo-main.png',
+    icon: '/kabarak-logo.png',
+    badge: '/kabarak-logo.png',
     data: data.url || '/',
     actions: data.actions || [],
   };

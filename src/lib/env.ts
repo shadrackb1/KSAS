@@ -87,7 +87,7 @@ function buildEnv(): EnvConfig {
     app: {
       name: getVar('VITE_APP_NAME'),
       url: getVar('VITE_APP_URL'),
-      logoUrl: (import.meta.env.VITE_APP_LOGO_URL as string) || 'https://res.cloudinary.com/dilrcexxe/image/upload/v1784619847/ksas/logo-main.png',
+      logoUrl: (import.meta.env.VITE_APP_LOGO_URL as string) || '/kabarak-logo.png',
       demoMode: getVar('VITE_DEMO_MODE') === 'true',
       enableGamification: getVar('VITE_ENABLE_GAMIFICATION') === 'true',
     },
