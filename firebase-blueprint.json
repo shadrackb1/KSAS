@@ -1,0 +1,50 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the application",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string" },
+        "status": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/courses/{courseId}": {
+      "schema": "User",
+      "description": "Courses"
+    },
+    "/enrollments/{enrollmentId}": {
+      "schema": "User",
+      "description": "Enrollments"
+    },
+    "/sessions/{sessionId}": {
+      "schema": "User",
+      "description": "Sessions"
+    },
+    "/sessions/{sessionId}/attendance/{studentId}": {
+      "schema": "User",
+      "description": "Attendance"
+    },
+    "/audit_logs/{logId}": {
+      "schema": "User",
+      "description": "Audit Logs"
+    },
+    "/settings/{settingId}": {
+      "schema": "User",
+      "description": "Settings"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "User",
+      "description": "Notifications"
+    }
+  }
+}

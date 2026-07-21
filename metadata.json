@@ -1,0 +1,10 @@
+{
+  "name": "KSAS Smart Attendance",
+  "description": "Secure, intelligent, and seamless attendance tracking designed for the modern academic ecosystem.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

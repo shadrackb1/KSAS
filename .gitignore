@@ -1,0 +1,23 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+.vercel
+
+# AI coding agent scaffolding
+.agents/
+.claude/
+.cursor/
+.windsurf/
+.bolt/
+.v0/
+docs/superpowers/
+CLAUDE.md
+AGENTS.md
+skills-lock.json
+graphify-out/

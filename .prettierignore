@@ -1,0 +1,11 @@
+node_modules
+dist
+build
+coverage
+*.lock
+*.log
+.git
+.vscode
+.idea
+.env*.local
+src/lib/env.ts

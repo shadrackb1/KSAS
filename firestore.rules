@@ -1,0 +1,329 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ============================================================
+    // HELPER FUNCTIONS
+    // ============================================================
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function getUserRole() {
+      return getUserData().role;
+    }
+    
+    function isAdmin() {
+      return getUserRole() == 'admin';
+    }
+    
+    function isLecturer() {
+      return getUserRole() == 'lecturer';
+    }
+    
+    function isStudent() {
+      return getUserRole() == 'student';
+    }
+    
+    function isHod() {
+      return getUserRole() == 'hod';
+    }
+    
+    function isDean() {
+      return getUserRole() == 'dean';
+    }
+    
+    function isAssociateDean() {
+      return getUserRole() == 'associate-dean';
+    }
+    
+    function isOversight() {
+      return isHod() || isDean() || isAssociateDean();
+    }
+    
+    function getUserId() {
+      return request.auth.uid;
+    }
+    
+    function getUserEmail() {
+      return request.auth.token.email;
+    }
+    
+    function isOwner(userId) {
+      return getUserId() == userId;
+    }
+    
+    function isEnrolledInCourse(courseCode) {
+      let enrollments = get(/databases/$(database)/documents/enrollments)
+        .where('studentId', '==', getUserId())
+        .where('courseCode', '==', courseCode);
+      return enrollments.size() > 0;
+    }
+    
+    function isLecturerOfCourse(courseCode) {
+      let course = get(/databases/$(database)/documents/courses/$(courseCode)).data;
+      return course.lecturerId == getUserId();
+    }
+    
+    function isLecturerOfSession(sessionId) {
+      let session = get(/databases/$(database)/documents/sessions/$(sessionId)).data;
+      return session.lecturerId == getUserId();
+    }
+    
+    function isOversightOfDepartment(department) {
+      if (!isOversight()) return false;
+      let userData = getUserData();
+      return userData.department == department;
+    }
+    
+    function isOversightOfFaculty(faculty) {
+      if (!isOversight()) return false;
+      let userData = getUserData();
+      return userData.faculty == faculty;
+    }
+    
+    function isValidSessionStatus(status) {
+      return status in ['draft', 'open', 'closed', 'archived'];
+    }
+    
+    // Rate limiting helper: max 1 write per second per user per session
+    function isRateLimited(sessionId, action) {
+      let key = "rate_limit_$(action)_$(getUserId())_$(sessionId)";
+      let lastWrite = get(/databases/$(database)/documents/rate_limits/$(key)).data?.timestamp;
+      return lastWrite != null && lastWrite > request.time - duration.value(1, 's');
+    }
+    
+    function setRateLimit(sessionId, action) {
+      let key = "rate_limit_$(action)_$(getUserId())_$(sessionId)";
+      set(/databases/$(database)/documents/rate_limits/$(key), {
+        timestamp: request.time,
+        userId: getUserId(),
+        action: action,
+        sessionId: sessionId
+      });
+    }
+
+    // ============================================================
+    // USERS COLLECTION
+    // ============================================================
+    match /users/{userId} {
+      // Users can read their own profile; admins and oversight can read all
+      allow read: if isSignedIn() && (isOwner(userId) || isAdmin() || isOversight());
+      
+      // Only admins can create users
+      allow create: if isSignedIn() && isAdmin();
+      
+      // Users can update their own profile (name, email, avatar, deviceFingerprint)
+      // Admins can update any user
+      allow update: if isSignedIn() && (
+        (isOwner(userId) && 
+          request.resource.data.keys().hasOnly(['name', 'email', 'avatar', 'deviceFingerprint', 'devicePendingReset', 'deviceHistory', 'preferences', 'updatedAt']) &&
+          request.resource.data.role == resource.data.role &&
+          request.resource.data.email == resource.data.email
+        ) || isAdmin()
+      );
+      
+      // Only admins can delete users
+      allow delete: if isSignedIn() && isAdmin();
+    }
+
+    // ============================================================
+    // COURSES COLLECTION
+    // ============================================================
+    match /courses/{courseId} {
+      // Anyone signed in can read courses (for enrollment dropdowns)
+      allow read: if isSignedIn();
+      
+      // Only admins can create courses
+      allow create: if isSignedIn() && isAdmin();
+      
+      // Lecturers can update their own courses, admins can update any
+      allow update: if isSignedIn() && (isAdmin() || (isLecturer() && isLecturerOfCourse(courseId)));
+      
+      // Only admins can delete courses
+      allow delete: if isSignedIn() && isAdmin();
+    }
+
+    // ============================================================
+    // ENROLLMENTS COLLECTION
+    // ============================================================
+    match /enrollments/{enrollmentId} {
+      // Students can read their own enrollments
+      // Lecturers can read enrollments for their courses
+      // Admins/oversight can read all
+      allow read: if isSignedIn() && (
+        isAdmin() || isOversight() ||
+        (isStudent() && resource.data.studentId == getUserId()) ||
+        (isLecturer() && isLecturerOfCourse(resource.data.courseCode))
+      );
+      
+      // Students can enroll themselves (with validation)
+      // Admins can enroll anyone
+      allow create: if isSignedIn() && (
+        (isAdmin()) ||
+        (isStudent() && 
+          request.resource.data.studentId == getUserId() &&
+          request.resource.data.status == 'active')
+      );
+      
+      // Students can drop their own enrollment
+      // Lecturers can update enrollments for their courses
+      // Admins can update any
+      allow update: if isSignedIn() && (
+        (isAdmin()) ||
+        (isStudent() && isOwner(resource.data.studentId) && 
+          request.resource.data.keys().hasOnly(['status', 'droppedAt'])) ||
+        (isLecturer() && isLecturerOfCourse(resource.data.courseCode))
+      );
+      
+      // Only admins can delete enrollments
+      allow delete: if isSignedIn() && isAdmin();
+    }
+
+    // ============================================================
+    // SESSIONS COLLECTION
+    // ============================================================
+    match /sessions/{sessionId} {
+      // Students can read sessions for courses they're enrolled in
+      // Lecturers can read their own sessions
+      // Admins/oversight can read all
+      allow read: if isSignedIn() && (
+        isAdmin() || isOversight() ||
+        (isLecturer() && isLecturerOfSession(sessionId)) ||
+        (isStudent() && isEnrolledInCourse(resource.data.courseCode))
+      );
+      
+      // Only lecturers can create sessions for their courses
+      // Admins can create any session
+      allow create: if isSignedIn() && (
+        (isAdmin()) ||
+        (isLecturer() && isLecturerOfCourse(request.resource.data.courseCode))
+      );
+      
+      // Lecturers can update their own sessions (status, topic, etc.)
+      // Admins can update any
+      allow update: if isSignedIn() && (
+        (isAdmin()) ||
+        (isLecturer() && isLecturerOfSession(sessionId) && 
+          request.resource.data.lecturerId == resource.data.lecturerId &&
+          isValidSessionStatus(request.resource.data.status))
+      );
+      
+      // Only admins can delete sessions
+      allow delete: if isSignedIn() && isAdmin();
+    }
+
+    // ============================================================
+    // SESSIONS SUB-COLLECTION: ATTENDANCE
+    // ============================================================
+    match /sessions/{sessionId}/attendance/{attendanceId} {
+      // Students can read their own attendance
+      // Lecturers can read all attendance for their sessions
+      // Admins/oversight can read all
+      allow read: if isSignedIn() && (
+        isAdmin() || isOversight() ||
+        (isLecturer() && isLecturerOfSession(sessionId)) ||
+        (isStudent() && resource.data.studentId == getUserId())
+      );
+      
+      // Students can check in (create attendance record)
+      // Lecturers can manually mark attendance
+      // Admins can create any
+      allow create: if isSignedIn() && (
+        (isAdmin()) ||
+        (isLecturer() && isLecturerOfSession(sessionId)) ||
+        (isStudent() && 
+          request.resource.data.studentId == getUserId() &&
+          request.resource.data.status in ['present', 'late'] &&
+          !isRateLimited(sessionId, 'checkin')
+        )
+      ) && (setRateLimit(sessionId, 'checkin') || true);
+      
+      // Only lecturers (for their sessions) and admins can update attendance
+      allow update: if isSignedIn() && (
+        (isAdmin()) ||
+        (isLecturer() && isLecturerOfSession(sessionId))
+      );
+      
+      // Only admins can delete attendance records
+      allow delete: if isSignedIn() && isAdmin();
+    }
+
+    // ============================================================
+    // SESSIONS SUB-COLLECTION: CONSUMED TOKENS (for anti-replay)
+    // ============================================================
+    match /sessions/{sessionId}/consumedTokens/{tokenId} {
+      // Only the security validation logic (server-side via transactions) can write
+      // Students/lecturers cannot directly read or write these
+      allow read: if false;
+      allow write: if isSignedIn() && (
+        // Allow transactional writes from validateCheckIn function
+        request.auth.token.firebase.sign_in_provider == 'custom' ||
+        isAdmin()
+      );
+    }
+
+    // ============================================================
+    // AUDIT LOGS
+    // ============================================================
+    match /audit_logs/{logId} {
+      // Only admins and oversight can read audit logs
+      allow read: if isSignedIn() && (isAdmin() || isOversight());
+      
+      // System can write audit logs (via admin SDK or Cloud Functions)
+      // Clients cannot write directly
+      allow write: if false;
+    }
+
+    // ============================================================
+    // FEEDBACK COLLECTION
+    // ============================================================
+    match /feedback/{feedbackId} {
+      // Students can create feedback for sessions they attended
+      // Lecturers can read feedback for their sessions
+      // Admins/oversight can read all
+      allow read: if isSignedIn() && (
+        isAdmin() || isOversight() ||
+        (isLecturer() && isLecturerOfSession(resource.data.sessionId))
+      );
+      
+      allow create: if isSignedIn() && (
+        (isStudent() && 
+          request.resource.data.studentId == getUserId() &&
+          request.resource.data.sessionId != null &&
+          request.resource.data.rating >= 1 && request.resource.data.rating <= 5
+        ) || isAdmin()
+      );
+      
+      allow update, delete: if isSignedIn() && isAdmin();
+    }
+
+    // ============================================================
+    // SCHOOL CODES COLLECTION
+    // ============================================================
+    match /school_codes/{codeId} {
+      // Only admins can read/write school codes
+      allow read, write: if isSignedIn() && isAdmin();
+    }
+
+    // ============================================================
+    // RATE LIMITS COLLECTION (internal)
+    // ============================================================
+    match /rate_limits/{limitId} {
+      // Only system transactions can read/write
+      allow read, write: if false;
+    }
+
+    // ============================================================
+    // DEFAULT DENY - catch all
+    // ============================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
