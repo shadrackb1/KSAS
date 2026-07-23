@@ -100,9 +100,9 @@ const ROUTE_MAP: Record<RoleId, string> = {
 
 const DB_ROLE_MAP: Record<RoleId, string> = {
   'admin': 'admin',
-  'dean': 'admin',
-  'associate-dean': 'admin',
-  'hod': 'admin',
+  'dean': 'dean',
+  'associate-dean': 'associate-dean',
+  'hod': 'hod',
   'lecturer': 'lecturer',
   'student': 'student',
 };
