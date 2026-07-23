@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { db, collection, query, where, getDocs } from '../lib/firebase';
 import { hashPassword } from '../lib/auth';
-import { seedAdminIfNotExists } from '../lib/seed-admin';
+
 import { useInstallPrompt } from '../hooks/useInstallPrompt';
 import InstallBanner from '../components/PWAInstallBanner';
 import {
@@ -159,8 +159,6 @@ export default function RoleSelection() {
     setError('');
 
     try {
-      // Ensure seed accounts exist before querying
-      await seedAdminIfNotExists();
 
       const usersRef = collection(db, 'users');
       const q = query(
