@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { db, collection, query, where, getDocs } from '../lib/firebase';
 import { hashPassword } from '../lib/auth';
+import { seedAdminIfNotExists } from '../lib/seed-admin';
 import { useInstallPrompt } from '../hooks/useInstallPrompt';
 import InstallBanner from '../components/PWAInstallBanner';
 import {
@@ -158,6 +159,9 @@ export default function RoleSelection() {
     setError('');
 
     try {
+      // Ensure seed accounts exist before querying
+      await seedAdminIfNotExists();
+
       const usersRef = collection(db, 'users');
       const q = query(
         usersRef,
@@ -186,15 +190,6 @@ export default function RoleSelection() {
       setLoginAttempts(0);
       login({ uid: userDoc.id, ...userData });
       localStorage.setItem(SHOW_INSTALL_KEY, '1');
-
-      const isTVETorDev = typeof window !== 'undefined' &&
-        window.matchMedia('(display-mode: standalone)').matches
-        || (navigator as any).standalone === true;
-
-      if (!isTVETorDev && canInstall && isVisible) {
-        await promptInstall();
-        localStorage.setItem('ksas_install_shown_v1', '1');
-      }
 
       navigate(ROUTE_MAP[selectedRole], { replace: true });
     } catch (err: any) {
