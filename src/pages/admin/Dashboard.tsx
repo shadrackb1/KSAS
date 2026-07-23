@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Shield, Users, UserPlus, Activity, Info, Star, Loader2, GraduationCap, BookOpen, Radio, BarChart3, FileText, Settings, UserCheck, ClipboardList, Zap } from 'lucide-react';
+import { Shield, Users, UserPlus, Activity, Info, Star, Loader2, GraduationCap, BookOpen, Radio, BarChart3, FileText, Settings, UserCheck, ClipboardList, Zap, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useFirestoreRealtimeCollection } from '../../hooks/useFirestoreRealtime';
 import { db, collection, getDocs, query, orderBy, limit } from '../../lib/firebase';
@@ -138,7 +138,7 @@ const todaySessions = useMemo(() => {
         <h2 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '12px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '10px' }}>
           Quick Actions
         </h2>
-        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
           {[
             { label: 'Create User', icon: UserPlus, path: '/admin/users/create', color: 'var(--kabu-maroon)', bg: 'var(--kabu-maroon-tint)' },
             { label: 'Manage Users', icon: Users, path: '/admin/users', color: 'var(--text-primary)', bg: 'var(--bg-elevated)' },
@@ -146,6 +146,7 @@ const todaySessions = useMemo(() => {
             { label: 'Archive', icon: ClipboardList, path: '/admin/archive', color: 'var(--text-primary)', bg: 'var(--bg-elevated)' },
             { label: 'Analytics', icon: BarChart3, path: '/admin/analytics', color: 'var(--text-primary)', bg: 'var(--bg-elevated)' },
             { label: 'Reports', icon: FileText, path: '/admin/reports', color: 'var(--text-primary)', bg: 'var(--bg-elevated)' },
+            { label: 'Student Attendance', icon: Search, path: '/admin/student-attendance', color: 'var(--kabu-maroon)', bg: 'var(--kabu-maroon-tint)' },
           ].map((action) => (
             <button
               key={action.label}

@@ -19,8 +19,6 @@ import {
 import {
   getFirestore,
   connectFirestoreEmulator,
-  enableIndexedDbPersistence,
-  enableMultiTabIndexedDbPersistence,
   collection,
   collectionGroup,
   doc,
@@ -40,7 +38,6 @@ import {
   serverTimestamp,
   increment,
   writeBatch,
-  Firestore,
   QueryConstraint,
   DocumentData
 } from 'firebase/firestore';
@@ -65,17 +62,10 @@ setPersistence(auth, browserLocalPersistence).catch(console.error);
 
 // Initialize Firestore with offline persistence
 export const db = getFirestore(app);
-const firestoreDb = db as Firestore;
 
-try {
-  if (typeof window !== 'undefined') {
-    enableMultiTabIndexedDbPersistence(firestoreDb).catch(() => {
-      enableIndexedDbPersistence(firestoreDb).catch(console.error);
-    });
-  }
-} catch (e) {
-  console.warn('Firestore persistence unavailable:', e);
-}
+// Firebase v12+ enables IndexedDB persistence by default.
+// The old enableIndexedDbPersistence/enableMultiTabIndexedDbPersistence
+// APIs were removed in v12 — no explicit call needed.
 
 // Initialize Storage
 export const storage = getStorage(app);
@@ -95,7 +85,7 @@ export const logAnalyticsEvent = (eventName: string, params?: Record<string, any
 // Emulator setup for development
 if (env.useEmulators && typeof window !== 'undefined') {
   connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
-  connectFirestoreEmulator(firestoreDb, 'localhost', 8080);
+  connectFirestoreEmulator(db, 'localhost', 8080);
   connectStorageEmulator(storage, 'localhost', 9199);
 }
 

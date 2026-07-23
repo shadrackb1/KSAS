@@ -9,6 +9,9 @@ coverage/
 
 .vercel
 
+# Credentials
+CREDENTIALS.txt
+
 # AI coding agent scaffolding
 .agents/
 .claude/

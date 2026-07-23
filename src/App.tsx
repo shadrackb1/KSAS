@@ -34,6 +34,7 @@ const AdminSessionArchive = lazy(() => import('./pages/admin/SessionArchive'));
 const AdminAnalytics = lazy(() => import('./pages/admin/Analytics'));
 const AdminReports = lazy(() => import('./pages/admin/reports'));
 const AdminSchoolCodes = lazy(() => import('./pages/admin/SchoolCodes'));
+const AdminStudentAttendance = lazy(() => import('./pages/admin/StudentAttendance'));
 
 const OversightDashboard = lazy(() => import('./pages/oversight/Dashboard'));
 const DeanDashboard = lazy(() => import('./pages/oversight/DeanDashboard'));
@@ -73,7 +74,8 @@ function SuspenseWrapper({ children }: { children: React.ReactNode }) {
 }
 
 function RoleGuard({ children, allowedRoles }: { children: React.ReactNode; allowedRoles: string[] }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  if (loading) return <PageLoader />;
   if (!user?.role) return <Navigate to="/" replace />;
   if (!allowedRoles.includes(user.role as string)) return <Navigate to="/" replace />;
   return <>{children}</>;
@@ -115,7 +117,7 @@ function App() {
             <Route path="analytics" element={<SuspenseWrapper><StudentAnalytics /></SuspenseWrapper>} />
             <Route path="profile" element={<SuspenseWrapper><StudentProfile /></SuspenseWrapper>} />
             <Route path="checkin" element={<SuspenseWrapper><StudentCheckIn /></SuspenseWrapper>} />
-            <Route path="calendar" element={<SuspenseWrapper><StudentDashboard /></SuspenseWrapper>} />
+            <Route path="calendar" element={<Navigate to="/student" replace />} />
           </Route>
 
           {/* Lecturer Routes */}
@@ -126,7 +128,7 @@ function App() {
             <Route path="risk" element={<SuspenseWrapper><LecturerRiskMonitor /></SuspenseWrapper>} />
             <Route path="profile" element={<SuspenseWrapper><StudentProfile /></SuspenseWrapper>} />
             <Route path="reports" element={<SuspenseWrapper><LecturerReports /></SuspenseWrapper>} />
-            <Route path="calendar" element={<SuspenseWrapper><LecturerDashboard /></SuspenseWrapper>} />
+            <Route path="calendar" element={<Navigate to="/lecturer" replace />} />
           </Route>
 
           {/* Admin Routes */}
@@ -145,6 +147,7 @@ function App() {
             <Route path="academics" element={<SuspenseWrapper><AdminDashboard /></SuspenseWrapper>} />
             <Route path="school-codes" element={<SuspenseWrapper><AdminSchoolCodes /></SuspenseWrapper>} />
             <Route path="settings" element={<SuspenseWrapper><AdminSchoolCodes /></SuspenseWrapper>} />
+            <Route path="student-attendance" element={<SuspenseWrapper><AdminStudentAttendance /></SuspenseWrapper>} />
           </Route>
 
           {/* HOD Routes */}

@@ -23,9 +23,11 @@ import {
 } from './firebase';
 import { collections } from './collections';
 import { validateTOTP } from './totp';
+import { env } from './env';
 
 // ── DEMO MODE ────────────────────────────────────────────────────────────────
-const DEMO_MODE = false;
+// Use the centralized env config so this stays in sync with VITE_DEMO_MODE.
+const DEMO_MODE = env.app.demoMode;
 
 export function isDemoMode(): boolean {
   return DEMO_MODE;
