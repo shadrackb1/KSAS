@@ -1,4 +1,7 @@
-# KSAS — Kabarak Smart Attendance System
+﻿# KSAS â€” Kabarak Smart Attendance System
+
+<img src="./assets/header.svg" width="100%" alt="header" />
+
 
 Attendance fraud is a real problem at universities. KSAS fixes it with QR codes that expire every five seconds, device fingerprinting, and a five-layer check that runs every time a student taps "Check In." Built for Kabarak University. React, TypeScript, Firebase.
 
@@ -6,7 +9,7 @@ Attendance fraud is a real problem at universities. KSAS fixes it with QR codes 
 
 ## What It Does
 
-**Students** scan a QR code to check in. The system checks their device, location, and network before recording attendance. They can track their own stats — per-course percentages, trends, how they compare to the class average. Registration numbers are parsed to auto-derive school affiliation, which helps surface relevant sessions and flag cross-school courses. Feedback is fully anonymous.
+**Students** scan a QR code to check in. The system checks their device, location, and network before recording attendance. They can track their own stats â€” per-course percentages, trends, how they compare to the class average. Registration numbers are parsed to auto-derive school affiliation, which helps surface relevant sessions and flag cross-school courses. Feedback is fully anonymous.
 
 **Lecturers** start a session, display a live QR code, and watch check-ins roll in real time. The QR refreshes every 5 seconds with a new TOTP token, so screenshots are useless. They get analytics, risk alerts for students dropping below 75%, and one-click CSV exports.
 
@@ -57,55 +60,55 @@ QR codes refresh every 5 seconds. Keyboard shortcuts like PrintScreen and Ctrl+S
 
 ```
 src/
-├── App.tsx              Routes for every role
-├── main.tsx             Entry point
-├── index.css            Theme, utilities, animations
-├── components/
-│   ├── ErrorBoundary.tsx    Catches render errors
-│   └── layout/
-│       ├── AppLayout.tsx    Sidebar + topbar + mobile nav
-│       ├── DesktopSidebar.tsx  Desktop nav
-│       ├── MobileNav.tsx    Bottom tab bar
-│       └── TopAppBar.tsx    Notifications, profile
-├── hooks/
-│   ├── useAuth.ts           localStorage auth
-│   ├── useCloudinaryCache.ts Cloudinary caching
-│   └── useFirestoreRealtime.ts Real-time Firestore hook
-├── lib/
-│   ├── analytics.ts         Stats and scoring
-│   ├── auth.ts              Password hashing
-│   ├── backfillSchoolCodes.ts  One-time migration for school codes
-│   ├── cloudinary.ts        Upload/download
-│   ├── collections.ts       Firestore collection names
-│   ├── csvExport.ts         CSV generation
-│   ├── db.ts                checkIn, archive, close, enrollment check
-│   ├── firebase.ts          Firebase init
-│   ├── gamification.ts      XP, levels, ranks, streaks
-│   ├── regNumberParser.ts   Registration number → school code parser
-│   ├── schoolCodes.ts       School code mapping CRUD (Firestore)
-│   ├── security.ts          Anti-fraud validation
-│   ├── totp.ts              TOTP generation
-│   └── utils.ts             Helpers
-└── pages/
-    ├── RoleSelection.tsx    Login landing
-    ├── admin/
-    │   ├── Dashboard.tsx
-    │   ├── CreateUser.tsx       Auto-derives schoolCode from reg number
-    │   ├── SchoolCodes.tsx      School code mapping management
-    │   ├── CourseManagement.tsx
-    │   ├── SessionArchive.tsx
-    │   ├── Analytics.tsx
-    │   └── Reports.tsx
-    ├── lecturer/
-    │   ├── Dashboard.tsx
-    │   ├── LiveSession.tsx      Live QR + manual attendance
-    │   ├── CourseManagement.tsx
-    │   └── RiskMonitor.tsx
-    └── student/
-        ├── Dashboard.tsx        All active/upcoming sessions, anonymous feedback
-        ├── CheckIn.tsx          Pre-confirmation before check-in
-        ├── Courses.tsx
-        └── Analytics.tsx
+â”œâ”€â”€ App.tsx              Routes for every role
+â”œâ”€â”€ main.tsx             Entry point
+â”œâ”€â”€ index.css            Theme, utilities, animations
+â”œâ”€â”€ components/
+â”‚   â”œâ”€â”€ ErrorBoundary.tsx    Catches render errors
+â”‚   â””â”€â”€ layout/
+â”‚       â”œâ”€â”€ AppLayout.tsx    Sidebar + topbar + mobile nav
+â”‚       â”œâ”€â”€ DesktopSidebar.tsx  Desktop nav
+â”‚       â”œâ”€â”€ MobileNav.tsx    Bottom tab bar
+â”‚       â””â”€â”€ TopAppBar.tsx    Notifications, profile
+â”œâ”€â”€ hooks/
+â”‚   â”œâ”€â”€ useAuth.ts           localStorage auth
+â”‚   â”œâ”€â”€ useCloudinaryCache.ts Cloudinary caching
+â”‚   â””â”€â”€ useFirestoreRealtime.ts Real-time Firestore hook
+â”œâ”€â”€ lib/
+â”‚   â”œâ”€â”€ analytics.ts         Stats and scoring
+â”‚   â”œâ”€â”€ auth.ts              Password hashing
+â”‚   â”œâ”€â”€ backfillSchoolCodes.ts  One-time migration for school codes
+â”‚   â”œâ”€â”€ cloudinary.ts        Upload/download
+â”‚   â”œâ”€â”€ collections.ts       Firestore collection names
+â”‚   â”œâ”€â”€ csvExport.ts         CSV generation
+â”‚   â”œâ”€â”€ db.ts                checkIn, archive, close, enrollment check
+â”‚   â”œâ”€â”€ firebase.ts          Firebase init
+â”‚   â”œâ”€â”€ gamification.ts      XP, levels, ranks, streaks
+â”‚   â”œâ”€â”€ regNumberParser.ts   Registration number â†’ school code parser
+â”‚   â”œâ”€â”€ schoolCodes.ts       School code mapping CRUD (Firestore)
+â”‚   â”œâ”€â”€ security.ts          Anti-fraud validation
+â”‚   â”œâ”€â”€ totp.ts              TOTP generation
+â”‚   â””â”€â”€ utils.ts             Helpers
+â””â”€â”€ pages/
+    â”œâ”€â”€ RoleSelection.tsx    Login landing
+    â”œâ”€â”€ admin/
+    â”‚   â”œâ”€â”€ Dashboard.tsx
+    â”‚   â”œâ”€â”€ CreateUser.tsx       Auto-derives schoolCode from reg number
+    â”‚   â”œâ”€â”€ SchoolCodes.tsx      School code mapping management
+    â”‚   â”œâ”€â”€ CourseManagement.tsx
+    â”‚   â”œâ”€â”€ SessionArchive.tsx
+    â”‚   â”œâ”€â”€ Analytics.tsx
+    â”‚   â””â”€â”€ Reports.tsx
+    â”œâ”€â”€ lecturer/
+    â”‚   â”œâ”€â”€ Dashboard.tsx
+    â”‚   â”œâ”€â”€ LiveSession.tsx      Live QR + manual attendance
+    â”‚   â”œâ”€â”€ CourseManagement.tsx
+    â”‚   â””â”€â”€ RiskMonitor.tsx
+    â””â”€â”€ student/
+        â”œâ”€â”€ Dashboard.tsx        All active/upcoming sessions, anonymous feedback
+        â”œâ”€â”€ CheckIn.tsx          Pre-confirmation before check-in
+        â”œâ”€â”€ Courses.tsx
+        â””â”€â”€ Analytics.tsx
 ```
 
 ---
@@ -153,29 +156,29 @@ Opens at `http://localhost:3000`.
 
 ## How Each Role Works
 
-**Student:** Pick "Student" on the landing page, log in, see all active and upcoming sessions on the dashboard (not just one). Cross-school courses are clearly flagged. Go to Check-In, scan the QR, confirm the class details, then check in. Device, GPS, IP, and enrollment are all validated. Feedback is fully anonymous — no student ID stored. They can check their history and analytics anytime.
+**Student:** Pick "Student" on the landing page, log in, see all active and upcoming sessions on the dashboard (not just one). Cross-school courses are clearly flagged. Go to Check-In, scan the QR, confirm the class details, then check in. Device, GPS, IP, and enrollment are all validated. Feedback is fully anonymous â€” no student ID stored. They can check their history and analytics anytime.
 
-**Lecturer:** Pick "Lecturer," log in, start a session from the dashboard — choose course, room, topic, security settings. The live QR code refreshes every 5 seconds. Watch check-ins come in. End the session when done. Attendance archives and a CSV becomes available. Check analytics, risk alerts, and reports through the semester.
+**Lecturer:** Pick "Lecturer," log in, start a session from the dashboard â€” choose course, room, topic, security settings. The live QR code refreshes every 5 seconds. Watch check-ins come in. End the session when done. Attendance archives and a CSV becomes available. Check analytics, risk alerts, and reports through the semester.
 
-**Admin:** Log in. Create, edit, suspend, or delete users. Registration numbers are parsed to auto-suggest school/department on account creation. Set up courses and assign lecturers. Manage school code prefix mappings (e.g. LAW → School of Law) without a code change. Browse archived sessions on Cloudinary. Pull organisation-wide reports and export them as CSV.
+**Admin:** Log in. Create, edit, suspend, or delete users. Registration numbers are parsed to auto-suggest school/department on account creation. Set up courses and assign lecturers. Manage school code prefix mappings (e.g. LAW â†’ School of Law) without a code change. Browse archived sessions on Cloudinary. Pull organisation-wide reports and export them as CSV.
 
 ---
 
 ## How the Key Pieces Work
 
-**Registration number parsing:** Every student registration number (e.g. `LAW/M/1714/05/26`) is parsed on account creation to extract the school prefix. This feeds into session filtering — students see sessions relevant to their school first, with cross-school electives clearly flagged.
+**Registration number parsing:** Every student registration number (e.g. `LAW/M/1714/05/26`) is parsed on account creation to extract the school prefix. This feeds into session filtering â€” students see sessions relevant to their school first, with cross-school electives clearly flagged.
 
-**Attendance engine:** Lecturer starts session → QR code with TOTP generated → student scans → pre-confirmation screen shows course, room, lecturer, and time → student confirms → five layers of validation + enrollment check → attendance logged to a Firestore subcollection → every connected client sees it in real time.
+**Attendance engine:** Lecturer starts session â†’ QR code with TOTP generated â†’ student scans â†’ pre-confirmation screen shows course, room, lecturer, and time â†’ student confirms â†’ five layers of validation + enrollment check â†’ attendance logged to a Firestore subcollection â†’ every connected client sees it in real time.
 
 **Live QR system:** Each QR embeds a TOTP token valid for 5 seconds. When the timer expires, a new token replaces it. A countdown and flash animation tell everyone in the room when the switch happens.
 
-**Anonymous feedback:** Students rate sessions from their dashboard. No student ID, name, or email is stored — only the session reference, rating, and optional comment. Admins see aggregated feedback per lecturer, not per student.
+**Anonymous feedback:** Students rate sessions from their dashboard. No student ID, name, or email is stored â€” only the session reference, rating, and optional comment. Admins see aggregated feedback per lecturer, not per student.
 
 **School code mapping:** Admins configure prefix-to-school mappings through a dedicated settings page. Mappings are stored in Firestore so they can be edited without a redeploy. Existing student accounts can be backfilled in one click.
 
 **Analytics:** Charts pull from Firestore in real time. Weekly trends, per-course breakdowns, an effectiveness score (60% attendance, 30% feedback, 10% consistency), and a comparison against the university average.
 
-**Risk monitoring:** Students below 75% attendance get flagged. High risk is under 50%. Medium risk is 50–75%. The system compares early-semester and late-semester performance to spot downward trends.
+**Risk monitoring:** Students below 75% attendance get flagged. High risk is under 50%. Medium risk is 50â€“75%. The system compares early-semester and late-semester performance to spot downward trends.
 
 **Reporting:** Filter by course and date range. Export includes student names, IDs, timestamps, room assignments, and device fingerprints.
 
